@@ -1,0 +1,157 @@
+int cols = 8; // Number of columns
+int rows = 8; // Number of rows
+int cellSize = 80; // Size of each cell
+Piece[][] board = new Piece[cols][rows]; // 2D array for pieces
+boolean isRedTurn = true; // Track whose turn it is
+Piece selectedPiece = null; // Currently selected piece
+
+void setup() {
+  size(640,640);
+  //size(cellSize*cols,cellSize*rows);
+  initializeBoard();
+}
+
+void draw() {
+  background(255);
+  drawBoard();
+  drawPieces();
+  highlightPossibleMoves();
+  //promotehoss();
+}
+void promotehoss(){
+  for (int x = 0; x < cols; x++) {
+    for (int y = 0; y < rows; y++) {
+      if (board[x][y] != null) {
+        board[x][y].display();
+      }
+    }
+  }
+}
+void drawBoard() {
+  for (int x = 0; x < cols; x++) {
+    for (int y = 0; y < rows; y++) {
+      fill((x + y) % 2 == 0 ? 255 : 150); // White or Black
+      rect(x * cellSize, y * cellSize, cellSize, cellSize);
+    }
+  }
+}
+
+void initializeBoard() {
+  for (int x = 0; x < cols; x++) {
+    for (int y = 0; y < rows; y++) {
+      if (y < 2 && (x + y) % 2 != 0) {
+        board[x][y] = new Piece(x, y, color(255, 0, 0)); // Red pieces
+      } else if (y > 5 && (x + y) % 2 != 0) {
+        board[x][y] = new Piece(x, y, color(0, 0, 0)); // Black pieces
+      }
+    }
+  }
+}
+
+void drawPieces() {
+  for (int x = 0; x < cols; x++) {
+    for (int y = 0; y < rows; y++) {
+      if (board[x][y] != null) {
+        board[x][y].display();
+      }
+    }
+  }
+}
+
+void highlightPossibleMoves() {
+  if (selectedPiece != null) {
+    fill(150, 150, 150, 100); // Semi-transparent green
+    int direction = isRedTurn ? -1 : 1; // Direction of movement
+    for (int dx = -1; dx <= 1; dx += 2) {
+      // Simple move
+      int newX = selectedPiece.x + dx;
+      int newY = selectedPiece.y + direction;
+      if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
+        if (board[newX][newY] == null) {
+          rect(newX * cellSize, newY * cellSize, cellSize, cellSize);
+        }
+      }
+      // Jump move
+      newX = selectedPiece.x + dx * 2;
+      newY = selectedPiece.y + direction * 2;
+      if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
+        Piece middlePiece = board[selectedPiece.x + dx][selectedPiece.y + direction];
+        if (middlePiece != null && middlePiece.c != selectedPiece.c && board[newX][newY] == null) {
+          rect(newX * cellSize, newY * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+  }
+}
+
+
+void mousePressed() {
+  int col = mouseX / cellSize;
+  int row = mouseY / cellSize;
+
+  if (col >= 0 && col < cols && row >= 0 && row < rows) {
+    if (board[col][row] != null && 
+        (isRedTurn && board[col][row].c == color(255, 0, 0) || 
+         !isRedTurn && board[col][row].c == color(0, 0, 0))) {
+      selectedPiece = board[col][row]; // Select piece
+    } else if (selectedPiece != null && board[col][row] == null) {
+      moveSelectedPiece(col, row); // Move piece
+    }
+  }
+}
+
+void moveSelectedPiece(int col, int row) {
+  if (isMoveValid(col, row)) {
+    // Move piece to new location
+    board[col][row] = selectedPiece;
+    board[selectedPiece.x][selectedPiece.y] = null; // Remove from old square
+    selectedPiece.x = col; 
+    selectedPiece.y = row; 
+    selectedPiece = null; // Deselect piece
+    isRedTurn = !isRedTurn; // Switch turn
+  }
+}
+
+boolean isMoveValid(int col, int row) {
+  // Basic movement validation
+  int direction = isRedTurn ? -1 : 1;
+
+  // Simple move
+  if (Math.abs(selectedPiece.x - col) == 1 && (selectedPiece.y - row) == direction) {
+    return true;
+  }
+  
+  // Jump move
+  if (Math.abs(selectedPiece.x - col) == 2 && (selectedPiece.y - row) == direction * 2) {
+    Piece middlePiece = board[(selectedPiece.x + col) / 2][(selectedPiece.y + row) / 2];
+    if (middlePiece != null && middlePiece.c != selectedPiece.c) {
+      // Perform the jump
+      board[(selectedPiece.x + col) / 2][(selectedPiece.y + row) / 2] = null; // Remove jumped piece
+      return true;
+    }
+  }
+
+  return false;
+}
+
+class Piece {
+  int x, y;
+  color c;
+
+  Piece(int x, int y, color c) {
+    this.x = x;
+    this.y = y;
+    this.c = c;
+  }
+
+  void display() {
+    fill(c);
+    if (selectedPiece == this) {
+      stroke(255, 255, 0); // Highlight selected piece
+      strokeWeight(4);
+    } else {
+      noStroke();
+    }
+    ellipse(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize * 0.6, cellSize * 0.6);
+  }
+}
