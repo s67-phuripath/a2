@@ -9,7 +9,7 @@ int savey;
 int[] color1 = { 255, 0, 0 };
 int[] color2 = { 0, 0, 0 };
 int[] color3 = {255, 192, 203};
-int[] color4 = { 212, 175, 55};
+int[] color4 = { 135, 206, 235};
 void setup() {
   size(640,640);
   //size(cellSize*cols,cellSize*rows);
@@ -169,7 +169,7 @@ boolean isMoveValid(int col, int row) {
           }
           count++;
           }
-        else if(board[selectedPiece.x+x][selectedPiece.y-x] != null && ((board[selectedPiece.x-x][selectedPiece.y-x].c == color(color1[0],color1[1],color1[2])||board[selectedPiece.x+x][selectedPiece.y-x].c == color(color3[0],color3[1],color3[2])) && !isRedTurn)){
+        else if(board[selectedPiece.x+x][selectedPiece.y-x] != null && ((board[selectedPiece.x+x][selectedPiece.y-x].c == color(color1[0],color1[1],color1[2])||board[selectedPiece.x+x][selectedPiece.y-x].c == color(color3[0],color3[1],color3[2])) && !isRedTurn)){
           if(count==0){
             savex=selectedPiece.x+x;
             savey=selectedPiece.y-x;
@@ -207,7 +207,7 @@ boolean isMoveValid(int col, int row) {
           }
         else if(board[selectedPiece.x-x][selectedPiece.y+x] != null && ((board[selectedPiece.x-x][selectedPiece.y+x].c == color(color1[0],color1[1],color1[2])||board[selectedPiece.x-x][selectedPiece.y+x].c == color(color3[0],color3[1],color3[2])) && !isRedTurn)){
           if(count==0){
-            savex=selectedPiece.x+x;
+            savex=selectedPiece.x-x;
             savey=selectedPiece.y+x;
           }
           count++;
@@ -219,7 +219,7 @@ boolean isMoveValid(int col, int row) {
       return true;}
     
     else if(count==0){
-      if((Math.abs(col)-Math.abs(selectedPiece.x))==(Math.abs(row)-Math.abs(selectedPiece.y))){
+      if(Math.abs(col-selectedPiece.x)==Math.abs(row-selectedPiece.y)){
         return true;
       }
     }
