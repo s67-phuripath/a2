@@ -4,7 +4,12 @@ int cellSize = 80; // Size of each cell
 Piece[][] board = new Piece[cols][rows]; // 2D array for pieces
 boolean isRedTurn = true; // Track whose turn it is
 Piece selectedPiece = null; // Currently selected piece
-
+int savex;
+int savey;
+int[] color1 = { 255, 0, 0 };
+int[] color2 = { 0, 0, 0 };
+int[] color3 = {255, 192, 203};
+int[] color4 = { 212, 175, 55};
 void setup() {
   size(640,640);
   //size(cellSize*cols,cellSize*rows);
@@ -16,14 +21,23 @@ void draw() {
   drawBoard();
   drawPieces();
   highlightPossibleMoves();
-  //promotehoss();
+  promotehoss();
 }
 void promotehoss(){
-  for (int x = 0; x < cols; x++) {
-    for (int y = 0; y < rows; y++) {
-      if (board[x][y] != null) {
-        board[x][y].display();
-      }
+    for (int x = 0; x < cols ; x++) {
+      if (board[x][rows-1] != null) {
+        if(board[x][rows-1].c == color(color1[0],color1[1],color1[2])){
+        board[x][rows-1] = null;
+        board[x][rows-1] = new Piece(x, rows-1, color(color3[0],color3[1],color3[2])); // Pink pieces
+        }
+    }
+  }
+  for (int x = 0; x < cols ; x++) {
+      if (board[x][0] != null) {
+        if(board[x][0].c == color(color2[0],color2[1],color2[2])){
+        board[x][0] = null;
+        board[x][0] = new Piece(x, 0, color(color4[0],color4[1],color4[2])); // Gold pieces
+        }
     }
   }
 }
@@ -40,9 +54,9 @@ void initializeBoard() {
   for (int x = 0; x < cols; x++) {
     for (int y = 0; y < rows; y++) {
       if (y < 2 && (x + y) % 2 != 0) {
-        board[x][y] = new Piece(x, y, color(255, 0, 0)); // Red pieces
+        board[x][y] = new Piece(x, y, color(color1[0],color1[1],color1[2])); // Red pieces
       } else if (y > 5 && (x + y) % 2 != 0) {
-        board[x][y] = new Piece(x, y, color(0, 0, 0)); // Black pieces
+        board[x][y] = new Piece(x, y, color(color2[0],color2[1],color2[2])); // Black pieces
       }
     }
   }
@@ -91,8 +105,10 @@ void mousePressed() {
 
   if (col >= 0 && col < cols && row >= 0 && row < rows) {
     if (board[col][row] != null && 
-        (isRedTurn && board[col][row].c == color(255, 0, 0) || 
-         !isRedTurn && board[col][row].c == color(0, 0, 0))) {
+        (isRedTurn && board[col][row].c == color(color1[0],color1[1],color1[2]) || 
+         !isRedTurn && board[col][row].c == color(color2[0],color2[1],color2[2]) || 
+         !isRedTurn && board[col][row].c == color(color4[0],color4[1],color4[2]) || 
+         isRedTurn && board[col][row].c == color(color3[0],color3[1],color3[2]))) {
       selectedPiece = board[col][row]; // Select piece
     } else if (selectedPiece != null && board[col][row] == null) {
       moveSelectedPiece(col, row); // Move piece
@@ -101,7 +117,10 @@ void mousePressed() {
 }
 
 void moveSelectedPiece(int col, int row) {
-  if (isMoveValid(col, row)) {
+  int rangex = col-selectedPiece.x;
+  int rangey = row-selectedPiece.y;
+  
+ if (isMoveValid(col, row)) {
     // Move piece to new location
     board[col][row] = selectedPiece;
     board[selectedPiece.x][selectedPiece.y] = null; // Remove from old square
@@ -115,14 +134,101 @@ void moveSelectedPiece(int col, int row) {
 boolean isMoveValid(int col, int row) {
   // Basic movement validation
   int direction = isRedTurn ? -1 : 1;
-
+  int hossx=selectedPiece.x - col;
+  int hossy=selectedPiece.y - row;
+  int count=0;
   // Simple move
   if (Math.abs(selectedPiece.x - col) == 1 && (selectedPiece.y - row) == direction) {
     return true;
   }
-  
+  if (selectedPiece.c == color(color4[0],color4[1],color4[2]) ||selectedPiece.c == color(color3[0],color3[1],color3[2])){
+    if(hossx>0 && hossy>0){
+      for (int x = 1; x <= hossx; x ++ ){
+        if(board[selectedPiece.x-x][selectedPiece.y-x] != null && ((board[selectedPiece.x-x][selectedPiece.y-x].c == color(color2[0],color2[1],color2[2])||board[selectedPiece.x-x][selectedPiece.y-x].c == color(color4[0],color4[1],color4[2])) && isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x-x;
+            savey=selectedPiece.y-x;
+          }
+          count++;
+          }
+        else if(board[selectedPiece.x-x][selectedPiece.y-x] != null && ((board[selectedPiece.x-x][selectedPiece.y-x].c == color(color1[0],color1[1],color1[2])||board[selectedPiece.x-x][selectedPiece.y-x].c == color(color3[0],color3[1],color3[2])) && !isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x-x;
+            savey=selectedPiece.y-x;
+          }
+          count++;
+        }
+    
+    }}
+    else if(hossx<0 && hossy>0){
+      for (int x = 1; x <= Math.abs(hossx); x ++ ){
+        if(board[selectedPiece.x+x][selectedPiece.y-x] != null && ((board[selectedPiece.x+x][selectedPiece.y-x].c == color(color2[0],color2[1],color2[2])||board[selectedPiece.x+x][selectedPiece.y-x].c == color(color4[0],color4[1],color4[2])) && isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x+x;
+            savey=selectedPiece.y-x;
+          }
+          count++;
+          }
+        else if(board[selectedPiece.x+x][selectedPiece.y-x] != null && ((board[selectedPiece.x-x][selectedPiece.y-x].c == color(color1[0],color1[1],color1[2])||board[selectedPiece.x+x][selectedPiece.y-x].c == color(color3[0],color3[1],color3[2])) && !isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x+x;
+            savey=selectedPiece.y-x;
+          }
+          count++;
+        }
+    
+    }}
+    else if(hossx<0 && hossy<0){
+      for (int x = 1; x <= Math.abs(hossx); x ++ ){
+        if(board[selectedPiece.x+x][selectedPiece.y+x] != null && ((board[selectedPiece.x+x][selectedPiece.y+x].c == color(color2[0],color2[1],color2[2])||board[selectedPiece.x+x][selectedPiece.y+x].c == color(color4[0],color4[1],color4[2])) && isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x+x;
+            savey=selectedPiece.y+x;
+          }
+          count++;
+          }
+        else if(board[selectedPiece.x+x][selectedPiece.y+x] != null && ((board[selectedPiece.x+x][selectedPiece.y+x].c == color(color1[0],color1[1],color1[2])||board[selectedPiece.x+x][selectedPiece.y+x].c == color(color3[0],color3[1],color3[2])) && !isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x+x;
+            savey=selectedPiece.y+x;
+          }
+          count++;
+        }
+    
+    }}
+    else if(hossx>0 && hossy<0){
+      for (int x = 1; x <= Math.abs(hossx); x ++ ){
+        if(board[selectedPiece.x-x][selectedPiece.y+x] != null && ((board[selectedPiece.x-x][selectedPiece.y+x].c == color(color2[0],color2[1],color2[2])||board[selectedPiece.x-x][selectedPiece.y+x].c == color(color4[0],color4[1],color4[2])) && isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x-x;
+            savey=selectedPiece.y+x;
+          }
+          count++;
+          }
+        else if(board[selectedPiece.x-x][selectedPiece.y+x] != null && ((board[selectedPiece.x-x][selectedPiece.y+x].c == color(color1[0],color1[1],color1[2])||board[selectedPiece.x-x][selectedPiece.y+x].c == color(color3[0],color3[1],color3[2])) && !isRedTurn)){
+          if(count==0){
+            savex=selectedPiece.x+x;
+            savey=selectedPiece.y+x;
+          }
+          count++;
+        }
+    
+    }}
+    if(count==1 && Math.abs(col - savex) == 1 && Math.abs(row - savey) == 1){
+      board[savex][savey] = null;
+      return true;}
+    
+    else if(count==0){
+      if((Math.abs(col)-Math.abs(selectedPiece.x))==(Math.abs(row)-Math.abs(selectedPiece.y))){
+        return true;
+      }
+    }
+    else{
+      return false;
+    }  
+}
   // Jump move
-  if (Math.abs(selectedPiece.x - col) == 2 && (selectedPiece.y - row) == direction * 2) {
+  else if (Math.abs(selectedPiece.x - col) == 2 && (selectedPiece.y - row) == direction * 2){
     Piece middlePiece = board[(selectedPiece.x + col) / 2][(selectedPiece.y + row) / 2];
     if (middlePiece != null && middlePiece.c != selectedPiece.c) {
       // Perform the jump
