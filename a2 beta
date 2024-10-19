@@ -20,8 +20,8 @@ void draw() {
   background(255);
   drawBoard();
   drawPieces();
-  highlightPossibleMoves();
   promotehoss();
+  end_game();
 }
 void promotehoss(){
     for (int x = 0; x < cols ; x++) {
@@ -72,29 +72,22 @@ void drawPieces() {
   }
 }
 
-void highlightPossibleMoves() {
-  if (selectedPiece != null) {
-    fill(150, 150, 150, 100); // Semi-transparent green
-    int direction = isRedTurn ? -1 : 1; // Direction of movement
-    for (int dx = -1; dx <= 1; dx += 2) {
-      // Simple move
-      int newX = selectedPiece.x + dx;
-      int newY = selectedPiece.y + direction;
-      if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
-        if (board[newX][newY] == null) {
-          rect(newX * cellSize, newY * cellSize, cellSize, cellSize);
-        }
+void end_game(){
+  int countr=0;
+  int countb=0;
+  for (int x = 0; x < cols; x++) {
+    for (int y = 0; y < rows; y++) {
+      if(board[x][y] != null){
+      if (board[x][y].c == color(color1[0],color1[1],color1[2]) || board[x][y].c ==color(color3[0],color3[1],color3[2])) {
+        countr++;
       }
-      // Jump move
-      newX = selectedPiece.x + dx * 2;
-      newY = selectedPiece.y + direction * 2;
-      if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
-        Piece middlePiece = board[selectedPiece.x + dx][selectedPiece.y + direction];
-        if (middlePiece != null && middlePiece.c != selectedPiece.c && board[newX][newY] == null) {
-          rect(newX * cellSize, newY * cellSize, cellSize, cellSize);
-        }
+      else if(board[x][y].c == color(color2[0],color2[1],color2[2])||board[x][y].c ==color(color4[0],color4[1],color4[2])){
+        countb++;
       }
-    }
+    }}
+  }
+  if(countr ==0|| countb==0){
+    exit();
   }
 }
 
@@ -250,7 +243,7 @@ class Piece {
     this.c = c;
   }
 
-void display() {
+  void display() {
     fill(c);
     if (selectedPiece == this) {
       stroke(255, 255, 0); // Highlight selected piece
